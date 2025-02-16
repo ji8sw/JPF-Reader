@@ -7,7 +7,7 @@ using byte = char;
 
 namespace JPF
 {
-	const int NameHashLength = 4; // 4 bytes to store the file name as a CityHash32
+	const int NameHashLength = 8; // 8 bytes to store the file name as a CityHash64
 	const int FileTypeLength = 1; // 1 byte to store the file type
 	const int FileSizeLength = 4; // 4 bytes to store the file size in bytes
 	const int TotalFileDescriptionSize = NameHashLength + FileTypeLength + FileSizeLength;
@@ -104,7 +104,7 @@ namespace JPF
 	// A JPF contains a list of Asset Data
 	struct JPFAssetData
 	{
-		int FileNameHash;
+		uint64_t FileNameHash;
 		FileType Type;
 		int FileSize;
 		std::vector<byte> FileData;
@@ -140,7 +140,7 @@ namespace JPF
 						JPFAssetData NewAsset;
 						int TotalOffset = 0;
 
-						NewAsset.FileNameHash = BytesToTypeErase<int>(Data);
+						NewAsset.FileNameHash = BytesToTypeErase<uint64_t>(Data);
 						NewAsset.Type = (FileType)BytesToTypeErase<byte>(Data);
 						NewAsset.FileSize = BytesToTypeErase<int>(Data);
 

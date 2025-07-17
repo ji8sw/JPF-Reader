@@ -3,7 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-using byte = char;
+using byte = unsigned char;
 
 namespace JPF
 {
@@ -16,8 +16,21 @@ namespace JPF
 	enum FileType : byte
 	{
 		PNG,
-		OBJ,
+		JPG, // Or, JPEG
+		OBJ, // Wavefront OBJ model file
+		FBX, // Filmbox model file
 		TXT,
+		HLSL, // DirectX Shader code
+		VERT, // Vertex Shader Code
+		FRAG, // Fragment Shader Code
+		VERTC, // Vertex Shader (Compiled)
+		FRAGC, // Fragment Shader (Compiled)
+		FX, // Shader Effect Code
+		FXC, // Shader Effect (Compiled)
+		EXE, // Executable (Compiled)
+		DLL, // Dynamic-linky library (Compiled)
+		JSON, // JavaScript Object Notation (Raw text, Formatted)
+		JPF, // Ji9sw Package File (Compiled)
 		// Add More
 		UNK = 255
 	};
@@ -46,11 +59,7 @@ namespace JPF
 			{
 				if (Bytes / 1024 / 1024 / 1024 > 1)
 				{
-					if (Bytes / 1024 / 1024 / 1024 / 1024 > 1)
-					{
-						return FileSizes::Gigabytes;
-					}
-					else return FileSizes::Gigabytes;
+					return FileSizes::Gigabytes;
 				}
 				else return FileSizes::Megabytes;
 			}
@@ -116,12 +125,20 @@ namespace JPF
 		bool Valid = false;
 		ReadResults ReadResult;
 
-		// JPF specific BytesToType which erases data it goes over
 		template <typename T>
-		T BytesToTypeErase(std::vector<byte>& Data, bool LittleEndian = true)
+		T BytesToTypeWithOffset(const std::vector<byte>& Data, size_t& Offset, bool LittleEndian = true)
 		{
-			T Value = BytesToType<T>(Data, 0, LittleEndian);
-			Data.erase(Data.begin(), Data.begin() + sizeof(T));
+			if (Offset + sizeof(T) > Data.size()) return T{};
+
+			T Value = 0;
+			for (std::size_t Index = 0; Index < sizeof(T); ++Index)
+			{
+				if (LittleEndian)
+					Value |= static_cast<T>(static_cast<unsigned char>(Data[Offset + Index])) << (Index * 8);
+				else
+					Value |= static_cast<T>(static_cast<unsigned char>(Data[Offset + Index])) << ((sizeof(T) - 1 - Index) * 8);
+			}
+			Offset += sizeof(T);
 			return Value;
 		}
 
@@ -131,34 +148,33 @@ namespace JPF
 			if (FileHasMagicHeader(Data))
 			{
 				Valid = true;
-				Data.erase(Data.begin(), Data.begin() + 3); // Delete magic header bytes
+				size_t Offset = 3;
 
 				if (!Data.empty())
 				{
-					while (Data.size() > TotalFileDescriptionSize) // this file contains another file
+					while (Data.size() - Offset >= TotalFileDescriptionSize) // this file contains another file
 					{
 						JPFAssetData NewAsset;
-						int TotalOffset = 0;
 
-						NewAsset.FileNameHash = BytesToTypeErase<uint64_t>(Data);
-						NewAsset.Type = (FileType)BytesToTypeErase<byte>(Data);
-						NewAsset.FileSize = BytesToTypeErase<int>(Data);
+						NewAsset.FileNameHash = BytesToTypeWithOffset<uint64_t>(Data, Offset);
+						NewAsset.Type = (FileType)BytesToTypeWithOffset<byte>(Data, Offset);
+						NewAsset.FileSize = BytesToTypeWithOffset<int>(Data, Offset);
 
-						if (Data.size() >= NewAsset.FileSize)
+						if (Data.size() - Offset >= NewAsset.FileSize)
 						{
-							NewAsset.FileData.assign(Data.begin(), Data.begin() + NewAsset.FileSize);
-							Data.erase(Data.begin(), Data.begin() + NewAsset.FileSize);
+							NewAsset.FileData.assign(Data.begin() + Offset, Data.begin() + Offset + NewAsset.FileSize);
+							Offset += NewAsset.FileSize;
 						}
 						else
 						{
 							// Handle corrupted file cases where declared file size is larger than remaining data
 							ReadResult = CorruptionOccurred;
-							break;
+							return;
 						}
 
 						Assets.push_back(NewAsset);
-						ReadResult = Success;
 					}
+					ReadResult = Success;
 				}
 				else
 					ReadResult = NoFiles;

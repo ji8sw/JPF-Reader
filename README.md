@@ -8,7 +8,7 @@ JPF is **not** something to be used by a user, and is instead made for game and 
 JPF files can be identified using the first 3 bytes of a `.jpf` file, the first 3 bytes should always be a magic header reading `JPF`
 
 After the magic header, the first few bytes will be:
-- 4 bytes for file name hash (CityHash32)
+- 8 bytes for file name hash (CityHash64)
 - 1 byte for file type
 - 4 bytes for file length
 - [FILE_LENGTH] bytes for file data

@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="JPFReader.h">
+    <ClInclude Include="JPFReader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

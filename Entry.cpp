@@ -1,6 +1,6 @@
 #include <iostream>
 #include <format>
-#include "JPFReader.h"
+#include "JPFReader.hpp"
 
 int main(int ArgumentCount, char* ArgumentValues[])
 {
@@ -47,11 +47,50 @@ int main(int ArgumentCount, char* ArgumentValues[])
 		case JPF::PNG:
 			printf("	Asset Type: Texture (PNG)\n");
 			break;
+		case JPF::JPG:
+			printf("	Asset Type: Texture (JPG)\n");
+			break;
 		case JPF::OBJ:
 			printf("	Asset Type: Model (OBJ)\n");
 			break;
+		case JPF::FBX:
+			printf("	Asset Type: Model (FBX)\n");
+			break;
 		case JPF::TXT:
 			printf("	Asset Type: Raw Text (TXT)\n");
+			break;
+		case JPF::HLSL:
+			printf("	Asset Type: Shader (HLSL)\n");
+			break;
+		case JPF::VERT:
+			printf("	Asset Type: Vertex Shader (Raw)\n");
+			break;
+		case JPF::VERTC:
+			printf("	Asset Type: Vertex Shader (Compiled)\n");
+			break;
+		case JPF::FRAG:
+			printf("	Asset Type: Fragment Shader (Raw)\n");
+			break;
+		case JPF::FRAGC:
+			printf("	Asset Type: Fragment Shader (Compiled)\n");
+			break;
+		case JPF::FX:
+			printf("	Asset Type: Shader (Compiled)\n");
+			break;
+		case JPF::FXC:
+			printf("	Asset Type: Shader (Compiled)\n");
+			break;
+		case JPF::EXE:
+			printf("	Asset Type: Windows Executable (Compiled)\n");
+			break;
+		case JPF::DLL:
+			printf("	Asset Type: Windows Dynamic-Link Library (Compiled)\n");
+			break;
+		case JPF::JSON:
+			printf("	Asset Type: JavaScript Object Notation (Raw text)\n");
+			break;
+		case JPF::JPF:
+			printf("	Asset Type: Ji9sw Package File (Compiled)\n");
 			break;
 		case JPF::UNK:
 			printf("	Asset Type: Unknown (UNK)\n");
